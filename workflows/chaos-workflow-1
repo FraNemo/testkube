@@ -1,0 +1,23 @@
+apiVersion: testworkflows.testkube.io/v1
+kind: TestWorkflow
+metadata:
+  name: chaos-workflow-1 # name of the Test Workflow
+spec:
+  content:
+    git: # checking out from git repository
+      uri: 
+      revision: main
+      paths:
+  container: # container settings
+    resources: # resource settings (optional)
+      requests: # resource requests
+        cpu: 
+        memory: 
+    workingDir:  # default workingDir
+  steps: # steps that will be executed by this Test Workflow
+  - name: Install resource
+    run:
+      image:  pingcap/chaos-mesh:latest
+      args: # args passed to the container
+      - 
+      - 
