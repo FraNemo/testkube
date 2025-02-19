@@ -2,25 +2,31 @@ apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
   name: k6smoketest # name of the Test Workflow
-    labels: 
-      tool: k6
-      type: smoke 
+  labels: 
+    tool: k6
+    type: smoke 
 spec: 
   content: 
     git: # checking out from git repository
-      uri: 
+      uri: https://github.com/FraNemo/testkube 
       revision: main
       paths:
-  container: # container settings
-    resources: # resource settings (optional)
-      requests: # resource requests
-        cpu: 
-        memory: 
-    workingDir:  # default workingDir
+        - tests/T1-SmokeTest.js
   steps: # steps that will be executed by this Test Workflow
-  - name: Install resource
+  - name: Run Tests
+    workingDir: /data
     run:
-      image:  pingcap/chaos-mesh:latest
+      image:  grafana/k6:0.49.0
+      env: 
+        - name: k6_WEB_DASHBOARD
+          value: "true"
+        - name: K6_WEB_DASHBOARD_EXPORT
+          value: k6-smoke-report.html
       args: # args passed to the container
-      - 
-      - 
+      - run 
+      - --out
+      - influxdb=http://influxdb.default.svc.cluster.local:8086/k6db
+      - T1-SmokeTest.js
+    artifacts: 
+      paths: 
+        - k6-smoke-report.html
