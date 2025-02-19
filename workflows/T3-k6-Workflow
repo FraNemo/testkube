@@ -1,19 +1,19 @@
 apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
-  name: k6smoketest # name of the Test Workflow
+  name: k6spiketest # name of the Test Workflow
   labels: 
     tool: k6
-    type: smoke 
+    type: spike 
 spec: 
   content: 
     git: # checking out from git repository
       uri: https://github.com/FraNemo/testkube/ 
       revision: main
       paths:
-        - tests/T1-SmokeTest.js
+        - tests/T1-SpikeTest.js
   steps: # steps that will be executed by this Test Workflow
-  - name: Run Smoke Test
+  - name: Run Spike Test
     workingDir: /data/repo/tests
     run:
       image:  grafana/k6:0.49.0
@@ -21,13 +21,13 @@ spec:
       - name: K6_WEB_DASHBOARD
         value: "true"
       - name: K6_WEB_DASHBOARD_EXPORT
-        value: /data/k6-smoke-report.html
+        value: /data/k6-spike-report.html
       args: # args passed to the container
       - run 
       - --out
       - influxdb=http://influxdb.default.svc.cluster.local:8086/k6db
-      - T1-SmokeTest.js
+      - T3-SpikeTest.js
     artifacts: 
       workingDir: /data
       paths: 
-      - k6-smoke-report.html
+      - k6-spike-report.html
