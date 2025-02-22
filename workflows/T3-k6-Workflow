@@ -1,7 +1,8 @@
 apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
-  name: k6spiketest # name of the Test Workflow
+  name: k6spiketest # name of the Test 
+  namespace: testkube
   labels: 
     tool: k6
     type: spike 

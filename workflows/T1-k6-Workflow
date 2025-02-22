@@ -2,6 +2,7 @@ apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
   name: k6smoketest # name of the Test Workflow
+  namespace: testkube
   labels: 
     tool: k6
     type: smoke 
