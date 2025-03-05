@@ -99,11 +99,12 @@ spec:
         path: /proc
         type: Directory
     - name: kubelet-mount
-      hostPath:
-        path: /var/lib/kubelet
-        type: Directory
   steps:
   - name: Run KubeBench
-    shell: kube-bench
+    shell: kube-bench > /tmp/report.txt
+  - name: Saving artifacts
+    condition: always
+    artifacts:
+      paths:
+      - /tmp/report.txt
 status: {}
-

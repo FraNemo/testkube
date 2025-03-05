@@ -18,7 +18,7 @@ spec:
    - name: zap-wrk
   steps: # steps that will be executed by this Test Workflow
   - name: Run Zap Scan
-    shell: zap-full-scan.py -t http://frontend-external.default.svc.cluster.local:80 -m 1 -d -D 5 -I -l PASS -T 60 -r zap-report.html
+    shell: zap-full-scan.py -t http://frontend-external.default.svc.cluster.local:80 -m 5 -d -D 5 -I -l PASS -T 60 -r zap-report.html
   - name: Saving artifacts
     condition: always
     artifacts:
