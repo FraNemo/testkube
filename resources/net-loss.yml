@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: net-loss
+spec:
+  action: loss
+  mode: one
+  selector:
+    namespaces:
+      - default
+  direction: both
+  duration: 10m
+  loss: 40
+  correlation: 50
