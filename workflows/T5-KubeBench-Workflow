@@ -51,9 +51,6 @@ spec:
     - name: proc-mount
       mountPath: /host/proc
       readOnly: true
-    - name: kubelet-mount
-      mountPath: /var/lib/kubelet
-      readOnly: true
   pod:
     nodeSelector:
       kubernetes.io/hostname: testkube
@@ -98,7 +95,6 @@ spec:
       hostPath:
         path: /proc
         type: Directory
-    - name: kubelet-mount
   steps:
   - name: Run KubeBench
     shell: kube-bench > /tmp/report.txt

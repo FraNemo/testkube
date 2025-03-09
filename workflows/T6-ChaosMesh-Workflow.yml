@@ -9,38 +9,60 @@ metadata:
 spec: 
   steps: # steps that will be executed by this Test Workflow
   - name: Install Chaos Mesh
-    image: alpine/helm
-    command: [sh, "-c"]
-    args:
-      - |
-        echo "Installing kubectl...";
-        apk add --no-cache curl;
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
-        chmod +x kubectl;
-        mv kubectl /usr/local/bin/;
-        echo "Creating Chaos Mesh namespace...";
-        kubectl create ns chaos-mesh;
-        echo "Adding Chaos Mesh Helm repo...";
-        helm repo add chaos-mesh https://charts.chaos-mesh.org;
-        helm repo update;
-        echo "Installing Chaos Mesh...";
-        helm install chaos-mesh chaos-mesh/chaos-mesh --namespace chaos-mesh --set controllerManager.replicas=1;
-        echo "Waiting for Chaos Mesh to be ready...";
-        kubectl wait --for=condition=available -n chaos-mesh deployment/chaos-controller-manager;
-  
+    run:  
+      image: alpine/helm
+      command: [sh, "-c"]
+      args:
+        - |
+          echo "Installing kubectl...";
+          apk add --no-cache curl;
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
+          chmod +x kubectl;
+          mv kubectl /usr/local/bin/;
+          echo "Creating Chaos Mesh namespace...";
+          kubectl create ns chaos-mesh;
+          echo "Adding Chaos Mesh Helm repo...";
+          helm repo add chaos-mesh https://charts.chaos-mesh.org;
+          helm repo update;
+          echo "Installing Chaos Mesh...";
+          helm install chaos-mesh chaos-mesh/chaos-mesh --namespace chaos-mesh --set controllerManager.replicas=1;
+          echo "Waiting for Chaos Mesh to be ready...";
+          kubectl wait --for=condition=available -n chaos-mesh deployment/chaos-controller-manager;
+
   - name: Submit Experiment 
     content: 
       git:
         uri: https://github.com/FraNemo/testkube/ 
         revision: main
         paths:
-          - tests/T1-SmokeTest.js
-    workingDir: /home
-    container: bitnami/kubectl  
-    command: [kubectl, apply, -f /home ] 
-    shell: zap-full-scan.py -t http://frontend-external.default.svc.cluster.local:80 -m 5 -d -D 5 -I -l PASS -T 60 -r zap-report.html
-  - name: Saving artifacts
-    condition: always
-    artifacts:
-      paths:
-      - zap-report.html
+          - resources/pod-kill.yml
+    workingDir: /repo/resources
+    container: 
+      image: bitnami/kubectl  
+      command: [kubectl]
+      args: 
+        - apply
+        - -f
+        - pod-kill.yml
+    
+  - name: Wait for Experiment to Finish
+    run:
+      image: alpine
+      command: ["sh", "-c"]
+      args: ["echo 'Chaos experiment running...'; sleep 600"]
+
+  - name: Uninstall Chaos Mesh
+    run:  
+      image: alpine/helm
+      command: [sh, "-c"]
+      args:
+        - |
+          echo "Uninstalling Chaos Mesh...";
+          helm uninstall chaos-mesh -n chaos-mesh;
+          echo "Deleting Chaos Mesh namespace...";
+          echo "Installing kubectl...";
+          apk add --no-cache curl;
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
+          chmod +x kubectl;
+          mv kubectl /usr/local/bin/;
+          kubectl delete ns chaos-mesh;
