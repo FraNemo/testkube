@@ -2,7 +2,7 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: Schedule
 metadata:
   name: scheduled-pod-kill
-  namespace: chaos-mesh
+  namespace: default
 spec:
   schedule: "*/1 * * * *"  
   type: PodChaos

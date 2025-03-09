@@ -37,13 +37,18 @@ spec:
         paths:
           - resources/pod-kill.yml
     workingDir: /repo/resources
-    container: 
+    run: 
       image: bitnami/kubectl  
-      command: [kubectl]
-      args: 
-        - apply
-        - -f
-        - pod-kill.yml
+      command: [sh, "-c"]
+      args:
+        - |
+          ls; 
+          echo " "; 
+          ls ../; 
+          echo " "; 
+          ls /repo/resources; 
+          echo "Submitting Chaos Mesh experiment...";
+          kubectl apply -f pod-kill.yml;   
     
   - name: Wait for Experiment to Finish
     run:
