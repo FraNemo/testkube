@@ -2,16 +2,26 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: Schedule
 metadata:
   name: scheduled-pod-kill
-  namespace: default
+  # Namespace in which the chaos experiment will run
+  namespace: default 
 spec:
+  # Cron schedule to run the experiment every minute
   schedule: "*/1 * * * *"  
   type: PodChaos
   historyLimit: 5  
   concurrencyPolicy: Forbid  
   podChaos:
+    # Type of fault to inject (in this case, kill a pod)
     action: pod-kill
+    # Select one random pod matching the selector
     mode: one  
     selector:
+      # Namespace to select the pod from
       namespaces:
         - default
+    # Duration for which the fault should persist
     duration: "30s"
+
+
+
+    

@@ -3,12 +3,18 @@ kind: NetworkChaos
 metadata:
   name: net-loss
 spec:
+  # Type of network chaos to inject
   action: loss
+  # Affect one random pod matching the selector
   mode: one
   selector:
+    # Namespace to select the pod from
     namespaces:
       - default
+  # Apply packet loss in both incoming and outgoing directions
   direction: both
   duration: 10m
+   # Percentage of packets to randomly drop
   loss: 40
+  # Probability that consecutive packets are dropped together
   correlation: 50
