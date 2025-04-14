@@ -2,19 +2,27 @@ apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
   # name of the Test Workflow
-  name: k6smoketest 
+  name: k6simtest 
   namespace: testkube 
   labels: 
     tool: k6
-    type: smoke 
+    type: simulation 
 spec: 
+  config: 
+    #parameters that can be passed to the test
+    testname: 
+      type: string
+      default: tests/T6-SimTest.js
+    reportname:
+      type: string
+      default: k6-sim-report.html
   content: 
     # Git repository from which the test will be imported
     git: 
       uri: https://github.com/FraNemo/testkube/ 
       revision: main
       paths:
-        - tests/T6-SimTest.js
+        - tests/{{ config.testname }}
   # steps that will be executed by this Test Workflow
   steps: 
   - name: Run Smoke Test
@@ -25,13 +33,11 @@ spec:
       - name: K6_WEB_DASHBOARD
         value: "true"
       - name: K6_WEB_DASHBOARD_EXPORT
-        value: /data/k6-sim-report.html
+        value: /data/{{ config.reportname }}
       args: # args passed to the container
       - run 
-      - --out
-      - influxdb=http://influxdb.default.svc.cluster.local:8086/k6db
-      - T6-SimTest.js
+      - '{{ config.testname }}'
     artifacts: 
       workingDir: /data
       paths: 
-      - k6-sim-report.html
+      - '{{ config.reportname }}'

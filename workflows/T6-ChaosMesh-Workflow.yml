@@ -1,95 +1,71 @@
 apiVersion: testworkflows.testkube.io/v1
 kind: TestWorkflow
 metadata:
-  name: chaostest # name of the Test Workflow
+  name: chaostest1 # name of the Test Workflow
   namespace: testkube
   labels: 
     tool: ChaosMesh
     type: pod-kill
 spec: 
-  spec: 
   # steps that will be executed by this Test Workflow
-    steps: 
-    #Chaos Mesh installation
-    - name: Install Chaos Mesh
-      run:  
-        image: alpine/helm
-        command: [sh, "-c"]
-        args:
-          - |
-            echo "Installing kubectl...";
-            apk add --no-cache curl;
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
-            chmod +x kubectl;
-            mv kubectl /usr/local/bin/;
-            echo "Creating Chaos Mesh namespace...";
-            kubectl create ns chaos-mesh;
-            echo "Adding Chaos Mesh Helm repo...";
-            helm repo add chaos-mesh https://charts.chaos-mesh.org;
-            helm repo update;
-            echo "Installing Chaos Mesh...";
-            helm install chaos-mesh chaos-mesh/chaos-mesh --namespace chaos-mesh --set controllerManager.replicas=1;
-            echo "Waiting for Chaos Mesh to be ready...";
-            kubectl wait --for=condition=available -n chaos-mesh deployment/chaos-controller-manager;
-
-    #User traffic simulation
-    - name: Run Load Test 
-      workingDir: /data/repo/tests
-      run:
-        image:  grafana/k6:0.49.0
-        env: 
-        - name: K6_WEB_DASHBOARD
-          value: "true"
-        - name: K6_WEB_DASHBOARD_EXPORT
-          value: /data/k6-sim-report.html
-        args: # args passed to the container
-        - run 
-        - --out
-        - influxdb=http://influxdb.default.svc.cluster.local:8086/k6db
-        - T6-SimTest.js
-      # artifacts saving 
-      artifacts: 
-        workingDir: /data
-        paths: 
-        - k6-sim-report.html
-        
-    #Chaos experiment execution
-    - name: Submit Experiment 
-      content: 
-        git:
-          uri: https://github.com/FraNemo/testkube/ 
-          revision: main
-          paths:
-            - resources/pod-kill.yml
-      workingDir: data/repo/resources
-      run: 
-        image: bitnami/kubectl  
-        command: [kubectl]
-        args:
-          - apply
-          - -f  
-          - pod-kill.yml  
+  steps: 
+  #Chaos Mesh installation
+  - name: Install Chaos Mesh
+    run:  
+      image: alpine/helm
+      command: [sh, "-c"]
+      args:
+        - |
+          echo "Installing kubectl...";
+          apk add --no-cache curl;
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s \
+          https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
+          chmod +x kubectl;
+          mv kubectl /usr/local/bin/;
+          echo "Creating Chaos Mesh namespace...";
+          kubectl create ns chaos-mesh;
+          echo "Adding Chaos Mesh Helm repo...";
+          helm repo add chaos-mesh https://charts.chaos-mesh.org;
+          helm repo update;
+          echo "Installing Chaos Mesh...";
+          helm install chaos-mesh chaos-mesh/chaos-mesh --namespace \
+          chaos-mesh --set controllerManager.replicas=1;
       
-    #Wait for Chaos experiment to finish
-    - name: Wait for Experiment to Finish
-      run:
-        image: alpine
-        command: ["sh", "-c"]
-        args: ["echo 'Chaos experiment running...'; sleep 600"]
+  #Chaos experiment execution
+  - name: Submit Experiment 
+    content: 
+      git:
+        uri: https://github.com/FraNemo/testkube/ 
+        revision: main
+        paths:
+          - resources/pod-kill.yml
+    workingDir: data/repo/resources
+    run: 
+      image: bitnami/kubectl  
+      command: [sh, "-c"]
+      args:
+        - |
+          echo "Waiting for Chaos Mesh to be ready...";
+          kubectl wait --for=condition=available -n chaos-mesh \
+          deployment/chaos-controller-manager;
+          kubectl apply -f pod-kill.yml;
+          sleep 600;
+          kubectl get events -A -o custom-columns=\
+          "MESSAGE:.message,TIME:.lastTimestamp,OBJECT:.involvedObject.name,REASON:.reason" \
+          | grep Applied > /data/chaos-mesh-events.txt;
+          kubectl delete -f pod-kill.yml;
+          echo "Chaos experiment completed";
+    artifacts: 
+      workingDir: /data
+      paths: 
+        - chaos-mesh-events.txt
 
-    #Uninstall Chaos Mesh
-    - name: Uninstall Chaos Mesh
-      run:  
-        image: alpine/helm
-        command: [sh, "-c"]
-        args:
-          - |
-            echo "Uninstalling Chaos Mesh...";
-            helm uninstall chaos-mesh -n chaos-mesh;
-            echo "Deleting Chaos Mesh namespace...";
-            echo "Installing kubectl...";
-            apk add --no-cache curl;
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl";
-            chmod +x kubectl;
-            mv kubectl /usr/local/bin/;
-            kubectl delete ns chaos-mesh;
+  #Uninstall Chaos Mesh
+  - name: Uninstall Chaos Mesh
+    run:  
+      image: alpine/helm
+      command: [sh, "-c"]
+      args:
+        - |
+          echo "Uninstalling Chaos Mesh...";
+          helm uninstall chaos-mesh -n chaos-mesh;
