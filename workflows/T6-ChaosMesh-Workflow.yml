@@ -50,8 +50,8 @@ spec:
           deployment/chaos-controller-manager;
           kubectl apply -f pod-kill.yml;
           sleep 600;
-          kubectl get events -A -o custom-columns=\
-          "MESSAGE:.message,TIME:.lastTimestamp,OBJECT:.involvedObject.name,REASON:.reason" \
+          kubectl get events --sort-by=.lastTimestamp -o custom-columns=\
+          "TIME:.lastTimestamp,OBJECT:.involvedObject.name,REASON:.reason,MESSAGE:.message" \
           | grep Applied > /data/chaos-mesh-events.txt;
           kubectl delete -f pod-kill.yml;
           echo "Chaos experiment completed";
