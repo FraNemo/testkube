@@ -9,7 +9,7 @@ metadata:
 spec: 
   container: 
     workingDir: /zap/wrk/
-    image: zaproxy/zap-stable:latest
+    image: zaproxy/zap-stable
     volumeMounts:
     - name: zap-wrk
       mountPath: /zap/wrk/

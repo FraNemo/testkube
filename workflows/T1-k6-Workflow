@@ -28,8 +28,6 @@ spec:
         value: /data/k6-smoke-report.html
       args: # args passed to the container
       - run 
-      - --out
-      - influxdb=http://influxdb.default.svc.cluster.local:8086/k6db
       - T1-SmokeTest.js
     artifacts: 
       workingDir: /data
