@@ -12,7 +12,7 @@ export const options = {
 
       // executor-specific configuration
       vus: 1,
-      duration: "2m"
+      duration: "20m"
     },
     User_Journey2: {
       // name of the executor to use
@@ -23,7 +23,7 @@ export const options = {
 
       // executor-specific configuration
       vus: 1,
-      duration: "2m"
+      duration: "20m"
     },
     User_Journey3: {
       // name of the executor to use
@@ -34,7 +34,7 @@ export const options = {
 
       // executor-specific configuration
       vus: 1,
-      duration: "2m"
+      duration: "20m"
     },
     User_Journey4: {
       // name of the executor to use
@@ -45,7 +45,7 @@ export const options = {
 
       // executor-specific configuration
       vus: 1,
-      duration: "2m"
+      duration: "20m"
     },
     User_Journey5: {
       // name of the executor to use
@@ -56,7 +56,7 @@ export const options = {
 
       // executor-specific configuration
       vus: 1,
-      duration: "2m"
+      duration: "20m"
     },
   },
 };
