@@ -30,10 +30,12 @@ export const options = {
       exec: 'User_Journey2',
     },
     User_Journey3: {
-      // name of the executor to use
-      executor: 'ramping-arrival-rate', //Assure load increase if the system slows
+      // Name of the executor to use
+      // it assures load increase if the system slows
+      executor: 'ramping-arrival-rate', 
       stages: [
-        { duration: '1h', target: 200 }, // just slowly ramp-up to a HUGE load
+        // slowly ramp-up to a HUGE load
+        { duration: '1h', target: 200 }, 
       ],
       preAllocatedVUs: 200,
       startRate: 5,
